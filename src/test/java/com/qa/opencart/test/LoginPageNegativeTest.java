@@ -6,7 +6,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class LoginPageNegativeTest extends BaseTest {
-
+//comment added
     @DataProvider
     public Object[][] getNegativeLoginData() {
         return new Object[][]{
