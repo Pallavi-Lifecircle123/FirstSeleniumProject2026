@@ -32,7 +32,7 @@ public class DriverFactory {
      * @param prop Properties object containing configuration settings, including the browser name.
      * @return it returns WebDriver instance
      */
-
+//new comment
     public WebDriver initDriver(Properties prop) {
         /**
          * This method initializes the WebDriver based on the browser name
