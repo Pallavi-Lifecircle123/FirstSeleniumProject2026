@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="ProductInfoTest Suite" verbose="2">
+
+    <test name="ProductInfoTest" preserve-order="true">
+        <classes>
+            <class name="com.qa.opencart.test.ProductInfoTest"/>
+        </classes>
+    </test>
+
+</suite>

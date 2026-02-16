@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MavenRunner">
+    <option name="jreName" value="22" />
+    <option name="vmOptions" value="-Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.release=22" />
+    <!-- Delegate build to Maven -->
+    <option name="delegateBuildToMaven" value="true" />
+  </component>
+  <component name="MavenGeneralSettings">
+    <option name="mavenHome" value="$PROJECT_DIR$/../../../../../../../../opt/homebrew/Cellar/maven/3.9.9/libexec" />
+  </component>
+</project>
