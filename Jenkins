@@ -1,0 +1,185 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven'
+    }
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                script {
+                    echo "Cleaning workspace..."
+                    sh '''
+                        rm -rf * .[^.]* || true
+                        rm -rf .git || true
+                    '''
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                script {
+                    echo "Cloning FirstSeleniumProject2026 repository..."
+                    sh '''
+                        rm -rf * .[^.]* .git 2>/dev/null || true
+                        if [ "$(ls -A 2>/dev/null)" ]; then
+                            rm -rf * .[^.]* 2>/dev/null || true
+                        fi
+                        git clone https://github.com/Pallavi-Lifecircle123/FirstSeleniumProject2026.git temp_repo
+                        mv temp_repo/* temp_repo/.[^.]* . 2>/dev/null || true
+                        mv temp_repo/.git . 2>/dev/null || true
+                        rm -rf temp_repo
+                        git checkout main || git checkout master || echo "Using default branch"
+                    '''
+                    echo "Verifying repository..."
+                    sh 'pwd'
+                    sh 'cat pom.xml | head -20'
+                    sh 'cat pom.xml | grep -iE "FIRSTSELENIUMFRAMEWORK|opencart" || echo "Checking repository name..."'
+                    sh 'ls -la src/test/resources/testrunners/ || echo "testrunners directory not found"'
+                }
+                sh "mvn -Dmaven.test.failure.ignore=true clean package -DskipTests"
+            }
+            post {
+                success {
+                    script {
+                        // Only archive artifacts, no JUnit reports since tests are skipped
+                        archiveArtifacts 'target/*.jar'
+                    }
+                }
+            }
+        }
+
+        stage("Deploy to QA") {
+            steps {
+                echo("deploy to qa done")
+            }
+        }
+
+        stage('Regression Automation Tests') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        echo "Cleaning and cloning correct repository..."
+                        sh '''
+                            rm -rf * .[^.]* .git 2>/dev/null || true
+                            if [ "$(ls -A 2>/dev/null)" ]; then
+                                rm -rf * .[^.]* 2>/dev/null || true
+                            fi
+                            git clone https://github.com/Pallavi-Lifecircle123/FirstSeleniumProject2026.git temp_repo
+                            mv temp_repo/* temp_repo/.[^.]* . 2>/dev/null || true
+                            mv temp_repo/.git . 2>/dev/null || true
+                            rm -rf temp_repo
+                            git checkout main || git checkout master || echo "Using default branch"
+                        '''
+                        echo "Verifying we're in the correct repository..."
+                        sh 'pwd'
+                        sh 'cat pom.xml | head -10'
+                        sh 'cat pom.xml | grep -iE "FIRSTSELENIUMFRAMEWORK|opencart" || echo "Wrong repository!"'
+                        sh 'cat pom.xml | grep -i "testng" || echo "TestNG not found in pom.xml"'
+                        sh 'ls -la src/test/resources/testrunners/testng_regression_Listner.xml || echo "TestNG XML file not found"'
+                        echo "Running regression tests..."
+                        sh '''
+                            mvn clean test -DsuiteXmlFile=src/test/resources/testrunners/testng_regression_Listner.xml -Denv=qa
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    script {
+                        // Publish JUnit test results if they exist
+                        junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
+                    }
+                }
+            }
+        }
+
+        stage('Publish Allure Reports') {
+            steps {
+                script {
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        properties: [],
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'allure-results']]
+                    ])
+                }
+            }
+        }
+
+        stage('Publish ChainTest Report'){
+            steps{
+                publishHTML([
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: 'target/chaintest',
+                    reportFiles: 'Index.html',
+                    reportName: 'HTML Regression ChainTest Report',
+                    reportTitles: ''
+                ])
+            }
+        }
+
+        stage("Deploy to Stage"){
+            steps{
+                echo("deploy to Stage")
+            }
+        }
+
+        stage('Sanity Automation Test') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        echo "Cleaning and cloning correct repository..."
+                        sh '''
+                            rm -rf * .[^.]* .git 2>/dev/null || true
+                            if [ "$(ls -A 2>/dev/null)" ]; then
+                                rm -rf * .[^.]* 2>/dev/null || true
+                            fi
+                            git clone https://github.com/Pallavi-Lifecircle123/FirstSeleniumProject2026.git temp_repo
+                            mv temp_repo/* temp_repo/.[^.]* . 2>/dev/null || true
+                            mv temp_repo/.git . 2>/dev/null || true
+                            rm -rf temp_repo
+                            git checkout main || git checkout master || echo "Using default branch"
+                        '''
+                        echo "Verifying repository..."
+                        sh 'cat pom.xml | grep -iE "FIRSTSELENIUMFRAMEWORK|opencart" || echo "Wrong repository!"'
+                        echo "Running sanity tests..."
+                        sh '''
+                            mvn clean test -DsuiteXmlFile=src/test/resources/testrunners/testng_regression1.xml -Denv=stage
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    script {
+                        // Publish JUnit test results if they exist
+                        junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
+                    }
+                }
+            }
+        }
+
+        stage('Publish sanity ChainTest Report'){
+            steps{
+                publishHTML([
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: 'target/chaintest',
+                    reportFiles: 'Index.html',
+                    reportName: 'HTML Sanity ChainTest Report',
+                    reportTitles: ''
+                ])
+            }
+        }
+
+        stage("Deploy to PROD"){
+            steps{
+                echo("deploy to PROD")
+            }
+        }
+    }
+}
