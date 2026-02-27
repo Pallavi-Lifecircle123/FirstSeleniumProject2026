@@ -8,28 +8,24 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-public class DriverFactory {
+public class DriverFactoryWithoutRemote {
     public WebDriver driver;
     public OptionsManager optionsManager;
     public Properties prop;
     public static String highlightEle;
     public static ThreadLocal<WebDriver> tlDriver = new ThreadLocal<WebDriver>();
-    private static final Logger log = LogManager.getLogger(DriverFactory.class);
+    private static final Logger log = LogManager.getLogger(DriverFactoryWithoutRemote.class);
 
     /**
      *  This method initializes the WebDriver based on the provided browser name. It supports Chrome, Firefox, Edge, and Safari browsers. If an invalid browser name is provided, it throws a FrameWorkException with an appropriate error message.
@@ -55,49 +51,16 @@ public class DriverFactory {
 
         highlightEle = prop.getProperty("highlight");
         optionsManager= new OptionsManager(prop);
-        boolean remoteExecution = Boolean.parseBoolean(prop.getProperty("remote"));
-        
-        log.info("Remote execution mode: " + remoteExecution);
-        if (remoteExecution) {
-            log.info("Hub URL: " + prop.getProperty("huburl"));
-        }
 
         switch (browserName.trim().toLowerCase()) {
             case "chrome":
-                if (remoteExecution)
-                {
-                  log.info("Using remote Chrome driver");
-                  init_remoteDriver("chrome");
-                }
-                else {
-                    log.info("Using local Chrome driver");
-                    tlDriver.set(new ChromeDriver(optionsManager.getChromeOptions()));
-                }
                 //driver = new ChromeDriver();
                 //for headless mode
-
-                break;
-            case "firefox":
-                if (remoteExecution) {
-                    // run tcs on remote - grid
-                    log.info("Using remote Firefox driver");
-                    init_remoteDriver("firefox");
-                } else {
-                    // run tcs in local
-                    log.info("Using local Firefox driver");
-                    tlDriver.set(new FirefoxDriver(optionsManager.getFirefoxOptions()));
-                }
+                tlDriver.set(new ChromeDriver(optionsManager.getChromeOptions()));
                 break;
             case "edge":
-                if (remoteExecution) {
-                    // run tcs on remote - grid
-                    log.info("Using remote Edge driver");
-                    init_remoteDriver("edge");
-                } else {
-                    // run tcs in local
-                    log.info("Using local Edge driver");
-                    tlDriver.set(new EdgeDriver(optionsManager.getEdgeOptions()));
-                }
+                //driver = new EdgeDriver();
+                tlDriver.set(new EdgeDriver());
                 break;
             case "safari":
                 //driver = new SafariDriver();
@@ -106,62 +69,15 @@ public class DriverFactory {
                 tlDriver.set(new SafariDriver(safariOptions));
                 break;
             default:
-                log.error(AppError.INVALID_BROWSER_MESSAGE + " : " + browserName);
-                FrameWorkException fe = new FrameWorkException(AppError.INVALID_BROWSER_MESSAGE + " : " + browserName);
-                log.error("Exception occurred while initializing driver: ", fe);
-                throw new FrameWorkException("=====INVALID BROWSER====");
+                //System.out.println(AppError.INVALID_BROWSER_MESSAGE);
+                log.error(AppError.INVALID_BROWSER_MESSAGE);
+                throw new FrameWorkException("====INVALID  MESSAGE ====");
         }
         getDriver().manage().deleteAllCookies();
         getDriver().manage().window().maximize();
         getDriver().get(prop.getProperty("url"));
         return getDriver();
 
-    }
-
-    /**
-     * This is use to initialize the selenium grid
-     * @param browserName The name of the browser (chrome, firefox, edge)
-     */
-    private void init_remoteDriver(String browserName) {
-        try {
-            String hubUrl = prop.getProperty("huburl");
-            log.info("Initializing remote driver for browser: " + browserName + " on hub: " + hubUrl);
-            
-            if (hubUrl == null || hubUrl.trim().isEmpty()) {
-                log.error("huburl property is not set in configuration file");
-                throw new FrameWorkException("=====HUB URL NOT CONFIGURED=====");
-            }
-            
-            switch (browserName.toLowerCase()) {
-                case "chrome":
-                    log.info("Creating RemoteWebDriver for Chrome on: " + hubUrl);
-                    tlDriver.set(new RemoteWebDriver(new URL(hubUrl), optionsManager.getChromeOptions()));
-                    log.info("Remote Chrome driver initialized successfully");
-                    break;
-                case "firefox":
-                    log.info("Creating RemoteWebDriver for Firefox on: " + hubUrl);
-                    tlDriver.set(new RemoteWebDriver(new URL(hubUrl), optionsManager.getFirefoxOptions()));
-                    log.info("Remote Firefox driver initialized successfully");
-                    break;
-                case "edge":
-                    log.info("Creating RemoteWebDriver for Edge on: " + hubUrl);
-                    tlDriver.set(new RemoteWebDriver(new URL(hubUrl), optionsManager.getEdgeOptions()));
-                    log.info("Remote Edge driver initialized successfully");
-                    break;
-                default:
-                    log.error("Plz supply the right browser name for selenium grid....");
-                    FrameWorkException fe = new FrameWorkException(AppError.INVALID_BROWSER_MESSAGE + " : " + browserName);
-                    log.error("Exception occurred while initializing driver: ", fe);
-                    throw new FrameWorkException("=====INVALID BROWSER=====");
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            log.error("Malformed URL exception while initializing remote driver. Hub URL: " + prop.getProperty("huburl"), e);
-            throw new FrameWorkException("=====INVALID HUB URL=====");
-        } catch (Exception e) {
-            log.error("Exception occurred while initializing remote driver: ", e);
-            throw new FrameWorkException("=====REMOTE DRIVER INITIALIZATION FAILED=====");
-        }
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.qa.opencart.listeners;
 
-import com.qa.opencart.factory.DriverFactory;
+import com.qa.opencart.factory.DriverFactoryWithoutRemote;
 import io.qameta.allure.Attachment;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -59,9 +59,9 @@ public class TestAllureListener implements ITestListener {
         Object testClass = iTestResult.getInstance();
         //WebDriver driver = BasePage.getDriver();
         // Allure ScreenShotRobot and SaveTestLog
-        if (DriverFactory.getDriver() instanceof WebDriver) {
+        if (DriverFactoryWithoutRemote.getDriver() instanceof WebDriver) {
             System.out.println("Screenshot captured for test case:" + getTestMethodName(iTestResult));
-            saveScreenshotPNG(DriverFactory.getDriver());
+            saveScreenshotPNG(DriverFactoryWithoutRemote.getDriver());
         }
         // Save a log on allure.
         saveTextLog(getTestMethodName(iTestResult) + " failed and screenshot taken!");

@@ -2,7 +2,6 @@ package com.qa.opencart.base;
 
 import com.aventstack.chaintest.plugins.ChainTestListener;
 import com.qa.opencart.factory.DriverFactory;
-import com.qa.opencart.listeners.TestAllureListener;
 import com.qa.opencart.pages.*;
 import jdk.jfr.Description;
 import org.openqa.selenium.WebDriver;

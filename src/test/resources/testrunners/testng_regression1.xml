@@ -11,7 +11,7 @@
 
 
     <test name="Login Page Test edge">
-        <parameter name="browser" value="chrome" />
+        <parameter name="browser" value="edge" />
         <classes>
             <class name="com.qa.opencart.test.LoginPageTest" />
         </classes>

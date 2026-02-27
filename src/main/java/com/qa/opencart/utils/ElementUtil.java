@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.qa.opencart.exceptions.ElementException;
-import com.qa.opencart.factory.DriverFactory;
+import com.qa.opencart.factory.DriverFactoryWithoutRemote;
 import io.qameta.allure.Step;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -217,7 +217,7 @@ public class ElementUtil {
 
     public WebElement getElement(By locator) {
         WebElement element = driver.findElement(locator);
-        if (Boolean.parseBoolean(DriverFactory.highlightEle)) {
+        if (Boolean.parseBoolean(DriverFactoryWithoutRemote.highlightEle)) {
             jsUtil.flash(element);
         }
         return element;
@@ -336,7 +336,7 @@ public class ElementUtil {
     public WebElement waitForElementPresence(By locator, int timeOut) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeOut));
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-        if(Boolean.parseBoolean(DriverFactory.highlightEle)) {
+        if(Boolean.parseBoolean(DriverFactoryWithoutRemote.highlightEle)) {
             jsUtil.flash(element);
         }
         return element;
@@ -351,7 +351,7 @@ public class ElementUtil {
         log.info("Waiting for element to be visible: " + locator + " with timeout: " + timeOut + " seconds");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeOut));
         WebElement element= wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-        if(Boolean.parseBoolean(DriverFactory.highlightEle)) {
+        if(Boolean.parseBoolean(DriverFactoryWithoutRemote.highlightEle)) {
             jsUtil.flash(element);
         }
         return element;

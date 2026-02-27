@@ -24,6 +24,7 @@ public class OptionsManager {
         if(Boolean.parseBoolean(prop.getProperty("incognito"))){
             co.addArguments("--incognito");
         }
+        // Note: browserName is automatically set by ChromeOptions, no need to set it manually
         return co;
     }
 
@@ -35,6 +36,7 @@ public class OptionsManager {
         if(Boolean.parseBoolean(prop.getProperty("incognito"))){
             fo.addArguments("--incognito");
         }
+        // Note: browserName is automatically set by FirefoxOptions, no need to set it manually
         return fo;
     }
     public EdgeOptions getEdgeOptions() {
@@ -45,6 +47,7 @@ public class OptionsManager {
         if(Boolean.parseBoolean(prop.getProperty("edge"))){
             ed.addArguments("--edge");
         }
+        // Note: browserName is automatically set by EdgeOptions, no need to set it manually
         return ed;
     }
 
